@@ -1,0 +1,14 @@
+ai_models
+**/lightning_logs
+**/models
+**/data
+**/*.pt
+**/*.pth
+**/*.zip
+**/*.pkl
+**/*.pickle
+test_images
+**/trash
+**/tmp
+**/outputs
+**/trash

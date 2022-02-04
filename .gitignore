@@ -1,5 +1,4 @@
 data
-ai_models
 **/lightning_logs
 **/models
 **/data
@@ -8,9 +7,9 @@ ai_models
 **/*.zip
 **/*.pkl
 **/*.pickle
-test_images
 **/trash
 **/tmp
 **/outputs
 **/trash
 __pycache__
+results

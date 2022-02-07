@@ -1,11 +1,12 @@
 
 from argparse import ArgumentParser
+
 import pytorch_lightning as pl
 
 from src.model import Model
 from src.data_loading import DataModule
 
-MODEL_CHOICES = ['distilbert-base-cased']
+MODEL_CHOICES = ['bert-base-cased','albert-base-v2']
 
 def get_parser():
     parser = ArgumentParser()
@@ -18,11 +19,11 @@ def get_parser():
     parser.add_argument('--test-size', default=.1, type=float, help=h)
     parser.add_argument('--val-size', default=.1, type=float, help=h)
     parser.add_argument('--train-portion', default=1., type=float, help=h)
-    parser.add_argument('--max-token-len', default=32, type=int, help=h)
+    parser.add_argument('--max-token-len', default=64, type=int, help=h)
 
     # Model
     parser.add_argument('--model-name', default='bert-base-cased', choices=MODEL_CHOICES, type=str, help=h)
-    parser.add_argument('--learning-rate', default=2e-5, type=float, help=h)
+    parser.add_argument('--learning-rate', default=1e-5, type=float, help=h)
     parser.add_argument('--num-warmup-steps', default=0, type=int, help=h)
     parser.add_argument('--num-training-steps', default=0, type=int, help=h)
 
@@ -39,24 +40,11 @@ def CHECKPOINT_FILENAME(monitor):
 
 if __name__ == '__main__':
     args = get_parser().parse_args()
-    model = Model(
-        model_name=args.model_name,
-        learning_rate=args.learning_rate,
-        num_warmup_steps=args.num_warmup_steps,
-        num_training_steps=args.num_training_steps
-    )
 
-    data_module = DataModule(
-        data_path=args.data_path,
-        batch_size=args.batch_size,
-        num_workers=args.num_workers,
-        test_size=args.test_size,
-        val_size=args.val_size,
-        train_portion=args.train_portion,
-        model_name=args.model_name,
-        max_token_len=args.max_token_len
+    model = Model(**vars(args))
 
-    )
+    data_module = DataModule(**vars(args))
+
     callbacks = [
         pl.callbacks.ProgressBar(),
         pl.callbacks.LearningRateMonitor(logging_interval='epoch'),

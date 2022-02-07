@@ -24,15 +24,13 @@ class Dataset(torch.utils.data.Dataset):
         sample = self.df.iloc[index]
 
         text = sample['text']
-        X = self.tokenizer.encode_plus(
+        X = self.tokenizer(
             text,
             add_special_tokens=True,
             max_length=self.max_token_len,
-            return_token_type_ids=False,
             padding='max_length',
             truncation=True,
-            return_attention_mask=True,
-            return_tensors='pt',
+            return_tensors='pt'
         )
 
         X = {k: v.squeeze() for k, v in X.items()}
@@ -53,6 +51,7 @@ class DataModule(pl.LightningDataModule):
         train_portion: float = 1.,
         model_name: str = 'bert-base-cased',
         max_token_len : int = 128,
+        **kwargs
     ):
         super().__init__()
 
@@ -62,7 +61,7 @@ class DataModule(pl.LightningDataModule):
         self.test_size = test_size
         self.val_size = val_size
         self.train_portion = train_portion
-        self.tokenizer = transformers.BertTokenizerFast.from_pretrained(model_name)
+        self.tokenizer = transformers.AutoTokenizer.from_pretrained(model_name)
         self.max_token_len = max_token_len
 
     def setup(self, stage=None):

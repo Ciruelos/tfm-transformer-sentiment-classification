@@ -7,15 +7,14 @@ import pytorch_lightning as pl
 class Model(pl.LightningModule):
     def __init__(
         self,
-        model_name: str = 'distilbert-base-cased',
+        model_name: str = 'bert-base-cased',
         learning_rate: float = 2e-5,
         num_warmup_steps: int = 0,
         num_training_steps: int = 100,
-        **kwargs
-        ):
+        **kwargs):
         super().__init__()
-        self.model = transformers.BertModel.from_pretrained(model_name, return_dict=True)
-        self.classifier = torch.nn.Linear(self.model.config.hidden_size, 1)
+        self.config = transformers.AutoConfig.from_pretrained(model_name, num_labels=1)
+        self.model = transformers.AutoModelForSequenceClassification.from_pretrained(model_name, config=self.config)
         self.learning_rate = learning_rate
         self.num_warmup_steps = num_warmup_steps
         self.num_training_steps = num_training_steps
@@ -25,30 +24,27 @@ class Model(pl.LightningModule):
 
         self.save_hyperparameters()
 
-    def forward(self, x):
-        y = self.model(input_ids=x['input_ids'], attention_mask=x['attention_mask'])
-        y = self.classifier(y.pooler_output)
-        return y
+    def forward(self, x, labels=None):
+        return self.model(input_ids=x['input_ids'], attention_mask=x['attention_mask'], labels=labels)
 
     def training_step(self, batch, batch_idx):
-        x, targets = batch
+        x, labels = batch
 
-        preds = self(x)
-
-        loss = self.loss(preds, targets)
+        preds = self(x, labels=labels)
+        loss = preds.loss
         self.log('train_loss', loss, prog_bar=True)
 
         return loss
 
     def validation_step(self, batch, batch_idx):
-        x, targets = batch
+        x, labels = batch
 
-        preds = self(x)
+        preds = self(x, labels)
 
-        loss = self.loss(preds, targets)
+        loss = preds.loss
         self.log('val_loss', loss, prog_bar=True)
 
-        self.accuracy(preds, targets.int())
+        self.accuracy(preds.logits, labels.int())
         return loss
 
     def on_validation_epoch_end(self):
@@ -57,14 +53,13 @@ class Model(pl.LightningModule):
         self.accuracy.reset()
 
     def test_step(self, batch, batch_idx):
-        x, targets = batch
+        x, labels = batch
 
-        preds = self(x)
-
-        loss = self.loss(preds, targets)
+        preds = self(x, labels)
+        loss = preds.loss
         self.log('test_loss', loss, prog_bar=True)
 
-        self.accuracy(preds, targets.int())
+        self.accuracy(preds.logits, labels.int())
         return loss
 
     def on_test_epoch_end(self):

@@ -24,14 +24,15 @@ class Model(pl.LightningModule):
 
         self.save_hyperparameters()
 
-    def forward(self, x, labels=None):
-        return self.model(input_ids=x['input_ids'], attention_mask=x['attention_mask'], labels=labels)
+    def forward(self, x):
+        return self.model(input_ids=x['input_ids'], attention_mask=x['attention_mask'])
 
     def training_step(self, batch, batch_idx):
         x, labels = batch
 
-        preds = self(x, labels=labels)
-        loss = preds.loss
+        preds = self(x)
+        loss = self.loss(preds.logits, labels)
+
         self.log('train_loss', loss, prog_bar=True)
 
         return loss
@@ -39,12 +40,12 @@ class Model(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         x, labels = batch
 
-        preds = self(x, labels)
+        preds = self(x)
+        loss = self.loss(preds.logits, labels)
 
-        loss = preds.loss
         self.log('val_loss', loss, prog_bar=True)
 
-        self.accuracy(preds.logits, labels.int())
+        self.accuracy(preds.logits.sigmoid(), labels.int())
         return loss
 
     def on_validation_epoch_end(self):
@@ -55,18 +56,15 @@ class Model(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         x, labels = batch
 
-        preds = self(x, labels)
-        loss = preds.loss
-        self.log('test_loss', loss, prog_bar=True)
+        preds = self(x)
 
-        self.accuracy(preds.logits, labels.int())
-        return loss
+        self.accuracy(preds.logits.sigmoid(), labels.int())
+        return
 
     def on_test_epoch_end(self):
         accuracy = self.accuracy.compute()
         self.log('test_accuracy', accuracy, prog_bar=True)
         self.accuracy.reset()
-
 
     def configure_optimizers(self):
         optimizer = transformers.AdamW(self.parameters(), lr=self.learning_rate)

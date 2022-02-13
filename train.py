@@ -1,4 +1,6 @@
 
+import json
+from pathlib import Path
 from argparse import ArgumentParser
 
 import pytorch_lightning as pl
@@ -6,7 +8,13 @@ import pytorch_lightning as pl
 from src.model import Model
 from src.data_loading import DataModule
 
-MODEL_CHOICES = ['bert-base-cased','albert-base-v2']
+MODEL_CHOICES = [
+    'bert-base-cased',
+    'albert-base-v2',
+    'roberta-base',
+    'distilbert-base-uncased',
+]
+
 
 def get_parser():
     parser = ArgumentParser()
@@ -62,3 +70,9 @@ if __name__ == '__main__':
     )
 
     trainer.fit(model, data_module)
+
+    test_metrics = trainer.test(ckpt_path='best')[0]
+
+    best_ckpt_dir = max(Path(f'lightning_logs/{args.log_name}').glob('*'), key=lambda x: int(x.name[-1]))
+
+    json.dump(test_metrics, open(best_ckpt_dir.joinpath('test_metrics.json'), 'w'), indent=2)

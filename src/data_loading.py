@@ -1,3 +1,5 @@
+from typing import Dict, Tuple
+
 import torch
 import transformers
 import pandas as pd
@@ -5,35 +7,18 @@ import pytorch_lightning as pl
 from sklearn.model_selection import train_test_split
 
 class Dataset(torch.utils.data.Dataset):
-    def __init__(
-        self,
-        df: pd.DataFrame,
-        tokenizer: transformers.AutoTokenizer,
-        max_token_len: int = 128,
-        ):
+    def __init__(self, df: pd.DataFrame):
         super().__init__()
 
         self.df = df
-        self.tokenizer = tokenizer
-        self.max_token_len = max_token_len
 
     def __len__(self):
         return len(self.df)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> Tuple[dict, torch.tensor]:
         sample = self.df.iloc[index]
 
-        text = sample['text']
-        X = self.tokenizer(
-            text,
-            add_special_tokens=True,
-            max_length=self.max_token_len,
-            padding='max_length',
-            truncation=True,
-            return_tensors='pt'
-        )
-
-        X = {k: v.squeeze() for k, v in X.items()}
+        X = sample['tokenized_text']
 
         target = torch.tensor([sample['sentiment']]).float()
 
@@ -74,16 +59,19 @@ class DataModule(pl.LightningDataModule):
         val_df = val_df.sample(int(self.train_portion * len(val_df)), random_state=42)
         test_df = test_df.sample(int(self.train_portion * len(test_df)), random_state=42)
 
+        train_df['tokenized_text'] = train_df['text'].apply(self.tokenize)
+        val_df['tokenized_text'] = val_df['text'].apply(self.tokenize)
+        test_df['tokenized_text'] = test_df['text'].apply(self.tokenize)
+
         print(f'Using {len(train_df)} samples for train')
         print(f'Using {len(val_df)} samples for val')
         print(f'Using {len(test_df)} samples for test')
 
+        self.train_dataset = Dataset(train_df)
+        self.val_dataset = Dataset(val_df)
+        self.test_dataset = Dataset(test_df)
 
-        self.train_dataset = Dataset(train_df, self.tokenizer, self.max_token_len)
-        self.val_dataset = Dataset(val_df, self.tokenizer, self.max_token_len)
-        self.test_dataset = Dataset(test_df, self.tokenizer, self.max_token_len)
-
-    def train_dataloader(self):
+    def train_dataloader(self) -> torch.utils.data.DataLoader:
         return torch.utils.data.DataLoader(
             dataset=self.train_dataset,
             shuffle=True,
@@ -92,16 +80,29 @@ class DataModule(pl.LightningDataModule):
             drop_last=True
         )
 
-    def val_dataloader(self):
+    def val_dataloader(self) -> torch.utils.data.DataLoader:
         return torch.utils.data.DataLoader(
             dataset=self.val_dataset,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
         )
 
-    def test_dataloader(self):
+    def test_dataloader(self) -> torch.utils.data.DataLoader:
         return torch.utils.data.DataLoader(
             dataset=self.test_dataset,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
         )
+
+    def tokenize(self, text: str) -> Dict[str, torch.tensor]:
+        X = self.tokenizer(
+            text,
+            add_special_tokens=True,
+            max_length=self.max_token_len,
+            padding='max_length',
+            truncation=True,
+            return_tensors='pt'
+        )
+
+        X = {k: v.squeeze() for k, v in X.items()}
+        return X

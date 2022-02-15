@@ -1,3 +1,5 @@
+from typing import Dict, Tuple
+
 import torch
 import torchmetrics
 import transformers
@@ -24,10 +26,10 @@ class Model(pl.LightningModule):
 
         self.save_hyperparameters()
 
-    def forward(self, x):
+    def forward(self, x: Dict[str, torch.tensor]):
         return self.model(input_ids=x['input_ids'], attention_mask=x['attention_mask'])
 
-    def training_step(self, batch, batch_idx):
+    def training_step(self, batch : Tuple[Dict[str, torch.tensor], torch.tensor], batch_idx: int):
         x, labels = batch
 
         preds = self(x)
@@ -37,7 +39,7 @@ class Model(pl.LightningModule):
 
         return loss
 
-    def validation_step(self, batch, batch_idx):
+    def validation_step(self, batch : Tuple[Dict[str, torch.tensor], torch.tensor], batch_idx: int):
         x, labels = batch
 
         preds = self(x)
@@ -48,12 +50,12 @@ class Model(pl.LightningModule):
         self.accuracy(preds.logits.sigmoid(), labels.int())
         return loss
 
-    def on_validation_epoch_end(self):
+    def on_validation_epoch_end(self) -> None:
         accuracy = self.accuracy.compute()
         self.log('val_accuracy', accuracy, prog_bar=True)
         self.accuracy.reset()
 
-    def test_step(self, batch, batch_idx):
+    def test_step(self, batch : Tuple[Dict[str, torch.tensor], torch.tensor], batch_idx: int):
         x, labels = batch
 
         preds = self(x)
@@ -61,12 +63,12 @@ class Model(pl.LightningModule):
         self.accuracy(preds.logits.sigmoid(), labels.int())
         return
 
-    def on_test_epoch_end(self):
+    def on_test_epoch_end(self) -> None:
         accuracy = self.accuracy.compute()
         self.log('test_accuracy', accuracy, prog_bar=True)
         self.accuracy.reset()
 
-    def configure_optimizers(self):
+    def configure_optimizers(self) -> dict:
         optimizer = transformers.AdamW(self.parameters(), lr=self.learning_rate)
         scheduler = transformers.get_linear_schedule_with_warmup(
             optimizer,

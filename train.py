@@ -16,7 +16,7 @@ MODEL_CHOICES = [
 ]
 
 
-def get_parser():
+def get_parser() -> ArgumentParser:
     parser = ArgumentParser()
     h = '%(type)s (default: %(default)s)'
 

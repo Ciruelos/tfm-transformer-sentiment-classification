@@ -7,7 +7,6 @@ ai_models
 **/*.zip
 **/*.pkl
 **/*.pickle
-test_images
 **/trash
 **/tmp
 **/outputs

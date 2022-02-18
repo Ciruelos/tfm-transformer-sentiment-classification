@@ -1,5 +1,6 @@
 
 import json
+import datetime
 from pathlib import Path
 from argparse import ArgumentParser
 
@@ -49,7 +50,10 @@ def CHECKPOINT_FILENAME(monitor):
 if __name__ == '__main__':
     args = get_parser().parse_args()
 
-    model = Model(**vars(args))
+    model = Model(
+        date=str(datetime.datetime.now().date()),
+        **vars(args)
+        )
 
     data_module = DataModule(**vars(args))
 

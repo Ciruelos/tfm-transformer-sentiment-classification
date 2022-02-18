@@ -15,8 +15,8 @@ class Model(pl.LightningModule):
         num_training_steps: int = 100,
         **kwargs):
         super().__init__()
-        self.config = transformers.AutoConfig.from_pretrained(model_name, num_labels=1)
-        self.model = transformers.AutoModelForSequenceClassification.from_pretrained(model_name, config=self.config)
+        model_config = transformers.AutoConfig.from_pretrained(model_name, num_labels=1)
+        self.model = transformers.AutoModelForSequenceClassification.from_pretrained(model_name, config=model_config)
         self.learning_rate = learning_rate
         self.num_warmup_steps = num_warmup_steps
         self.num_training_steps = num_training_steps

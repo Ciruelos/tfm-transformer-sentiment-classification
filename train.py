@@ -44,18 +44,22 @@ def get_parser() -> ArgumentParser:
 
     return parser
 
+
 def CHECKPOINT_FILENAME(monitor):
     return '{epoch}_{' + monitor + ':.5f}'
+
 
 if __name__ == '__main__':
     args = get_parser().parse_args()
 
+    data_module = DataModule(**vars(args))
+
     model = Model(
         date=str(datetime.datetime.now().date()),
+        len_tokenizer=len(data_module.tokenizer),
         **vars(args)
         )
 
-    data_module = DataModule(**vars(args))
 
     callbacks = [
         pl.callbacks.ProgressBar(),

@@ -1,3 +1,4 @@
+import re
 from typing import Dict, Tuple
 
 import torch
@@ -46,8 +47,25 @@ class DataModule(pl.LightningDataModule):
         self.test_size = test_size
         self.val_size = val_size
         self.train_portion = train_portion
-        self.tokenizer = transformers.AutoTokenizer.from_pretrained(model_name)
         self.max_token_len = max_token_len
+
+        self.tokenizer = transformers.AutoTokenizer.from_pretrained(model_name)
+        # Add tokens
+        self.emojis2word = {
+            ':)': '<SMILE>', ':-)': '<SMILE>', ';d': '<WINK>', ':-E': '<VAMPIRE>', ':(': '<SAD>',':-(': '<SAD>', ':-<': '<SAD>',
+            ':P': '<RASPBERRY>', ':O': '<SURPRISED>', ':-@': '<SHOCKED>', ':@': '<SHOCKED>',':-$': '<CONFUSED>', ':\\': '<ANNOYED>',
+            ':#': '<MUTE>', ':X': '<MUTE>', ':^)': '<SMILE>', ':-&': '<CONFUSED>', '$_$': '<GREEDY>','@@': '<EYEROLL>',
+            ':-!': '<CONFUSED>', ':-D': '<SMILE>', ':-0': '<YELL>', 'O.o': '<CONFUSED>','<(-_-)>': '<ROBOT>', 'd[-_-]b': '<DJ>',
+            ":'-)": '<SAD>',';)': '<WINK>',';-)': '<WINK>', 'O:-)': '<ANGEL>','O*-)': '<ANGEL>','(:-D': '<GOSSIP>',
+        }
+        self.tokenizer.add_tokens(
+            ['<URL>', '<USER>'] + [v for v in self.emojis2word.values()]
+        )
+
+        self.text_preprocess_steps = [
+            self.emojis_per_words,
+            self.patterns_per_words
+        ]
 
     def setup(self, stage=None):
         df = pd.read_csv(self.data_path)
@@ -59,9 +77,13 @@ class DataModule(pl.LightningDataModule):
         val_df = val_df.sample(int(self.train_portion * len(val_df)), random_state=42)
         test_df = test_df.sample(int(self.train_portion * len(test_df)), random_state=42)
 
-        train_df['tokenized_text'] = train_df['text'].apply(self.tokenize)
-        val_df['tokenized_text'] = val_df['text'].apply(self.tokenize)
-        test_df['tokenized_text'] = test_df['text'].apply(self.tokenize)
+        train_df['preprocesed_text'] = train_df['text'].apply(self.apply_text_preprocess_steps)
+        val_df['preprocesed_text'] = val_df['text'].apply(self.apply_text_preprocess_steps)
+        test_df['preprocesed_text'] = test_df['text'].apply(self.apply_text_preprocess_steps)
+
+        train_df['tokenized_text'] = train_df['preprocesed_text'].apply(self.tokenize)
+        val_df['tokenized_text'] = val_df['preprocesed_text'].apply(self.tokenize)
+        test_df['tokenized_text'] = test_df['preprocesed_text'].apply(self.tokenize)
 
         print(f'Using {len(train_df)} samples for train')
         print(f'Using {len(val_df)} samples for val')
@@ -106,3 +128,21 @@ class DataModule(pl.LightningDataModule):
 
         X = {k: v.squeeze() for k, v in X.items()}
         return X
+
+    def apply_text_preprocess_steps(self, text):
+        for step in self.text_preprocess_steps:
+            text = step(text)
+        return text
+
+    def patterns_per_words(self, text):
+        url_pattern = r'((http://)[^ ]*|(https://)[^ ]*|( www\.)[^ ]*)'
+        user_pattern = r'@[^\s]+'
+        text = re.sub(url_pattern, '<URL>', text)
+        text = re.sub(user_pattern, '<USER>', text)
+
+        return text
+
+    def emojis_per_words(self, text):
+        for emoji, word in self.emojis2word.items():
+            text = text.replace(emoji, word)
+        return text

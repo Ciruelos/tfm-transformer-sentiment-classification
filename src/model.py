@@ -17,6 +17,8 @@ class Model(pl.LightningModule):
         super().__init__()
         model_config = transformers.AutoConfig.from_pretrained(model_name, num_labels=1)
         self.model = transformers.AutoModelForSequenceClassification.from_pretrained(model_name, config=model_config)
+        self.model.resize_token_embeddings(kwargs['len_tokenizer'])
+
         self.learning_rate = learning_rate
         self.num_warmup_steps = num_warmup_steps
         self.num_training_steps = num_training_steps
@@ -29,7 +31,7 @@ class Model(pl.LightningModule):
     def forward(self, x: Dict[str, torch.tensor]):
         return self.model(input_ids=x['input_ids'], attention_mask=x['attention_mask'])
 
-    def training_step(self, batch : Tuple[Dict[str, torch.tensor], torch.tensor], batch_idx: int):
+    def training_step(self, batch: Tuple[Dict[str, torch.tensor], torch.tensor], batch_idx: int):
         x, labels = batch
 
         preds = self(x)
@@ -39,7 +41,7 @@ class Model(pl.LightningModule):
 
         return loss
 
-    def validation_step(self, batch : Tuple[Dict[str, torch.tensor], torch.tensor], batch_idx: int):
+    def validation_step(self, batch: Tuple[Dict[str, torch.tensor], torch.tensor], batch_idx: int):
         x, labels = batch
 
         preds = self(x)
@@ -55,7 +57,7 @@ class Model(pl.LightningModule):
         self.log('val_accuracy', accuracy, prog_bar=True)
         self.accuracy.reset()
 
-    def test_step(self, batch : Tuple[Dict[str, torch.tensor], torch.tensor], batch_idx: int):
+    def test_step(self, batch: Tuple[Dict[str, torch.tensor], torch.tensor], batch_idx: int):
         x, labels = batch
 
         preds = self(x)

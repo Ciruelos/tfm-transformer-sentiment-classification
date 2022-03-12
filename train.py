@@ -42,9 +42,11 @@ def get_parser() -> ArgumentParser:
     parser.add_argument('--accumulate-grad-batches', default=32, type=int, help=h)
     parser.add_argument('--num-max-epochs', default=10, type=int, help=h)
     parser.add_argument('--num-warmup-epochs', default=2, type=int, help=h)
+    parser.add_argument('--loss-name', default='bce', type=str, help=h)
 
     # Other
     parser.add_argument('--log-name', default='default', type=str, help=h)
+    parser.add_argument('--comments', default='', type=str, help=h)
 
     return parser
 

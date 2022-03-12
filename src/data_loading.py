@@ -35,6 +35,8 @@ class DataModule(pl.LightningDataModule):
         test_size: float = .1,
         val_size: float = .1,
         train_portion: float = 1.,
+        val_portion: float = 1.,
+        test_portion: float = 1.,
         model_name: str = 'bert-base-cased',
         max_token_len : int = 128,
         **kwargs
@@ -47,6 +49,8 @@ class DataModule(pl.LightningDataModule):
         self.test_size = test_size
         self.val_size = val_size
         self.train_portion = train_portion
+        self.val_portion = val_portion
+        self.test_portion = test_portion
         self.max_token_len = max_token_len
 
         self.tokenizer = transformers.AutoTokenizer.from_pretrained(model_name)
@@ -74,8 +78,8 @@ class DataModule(pl.LightningDataModule):
         train_df, val_df = train_test_split(train_df, test_size=self.val_size, random_state=42, shuffle=True)
 
         train_df = train_df.sample(int(self.train_portion * len(train_df)), random_state=42)
-        val_df = val_df.sample(int(self.train_portion * len(val_df)), random_state=42)
-        test_df = test_df.sample(int(self.train_portion * len(test_df)), random_state=42)
+        val_df = val_df.sample(int(self.val_portion * len(val_df)), random_state=42)
+        test_df = test_df.sample(int(self.test_portion * len(test_df)), random_state=42)
 
         train_df['preprocesed_text'] = train_df['text'].apply(self.apply_text_preprocess_steps)
         val_df['preprocesed_text'] = val_df['text'].apply(self.apply_text_preprocess_steps)

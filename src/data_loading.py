@@ -7,6 +7,7 @@ import pandas as pd
 import pytorch_lightning as pl
 from sklearn.model_selection import train_test_split
 
+
 class Dataset(torch.utils.data.Dataset):
     def __init__(self, df: pd.DataFrame):
         super().__init__()

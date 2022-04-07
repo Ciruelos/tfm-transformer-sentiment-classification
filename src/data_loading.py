@@ -74,6 +74,8 @@ class DataModule(pl.LightningDataModule):
         ]
 
     def setup(self, stage=None):
+        print('Preparing data for training, this can take a while ...')
+
         df = pd.read_csv(self.data_path)
 
         train_df, test_df = train_test_split(df, test_size=self.test_size, random_state=42, shuffle=True)

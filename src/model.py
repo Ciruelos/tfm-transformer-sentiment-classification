@@ -52,7 +52,8 @@ class Model(pl.LightningModule):
         num_warmup_steps: int = 0,
         num_training_steps: int = 100,
         loss_name: str = 'bce',
-        **kwargs):
+        **kwargs
+    ):
         super().__init__()
         model_config = transformers.AutoConfig.from_pretrained(model_name, num_labels=1)
         self.model = transformers.AutoModelForSequenceClassification.from_pretrained(model_name, config=model_config)

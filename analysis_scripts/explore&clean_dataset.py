@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+
 if __name__ == '__main__':
     dataset_path = 'data/training.1600000.processed.noemoticon.csv'
     DATASET_COLUMNS = ['sentiment', 'ids', 'date', 'flag', 'user', 'text']

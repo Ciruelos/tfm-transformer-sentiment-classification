@@ -7,6 +7,7 @@ import pandas as pd
 import transformers
 from tqdm import tqdm
 
+
 def get_parser():
     parser = ArgumentParser()
     h = '%(type)s (default: %(default)s)'

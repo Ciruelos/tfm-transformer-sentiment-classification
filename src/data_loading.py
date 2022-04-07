@@ -39,7 +39,7 @@ class DataModule(pl.LightningDataModule):
         val_portion: float = 1.,
         test_portion: float = 1.,
         model_name: str = 'bert-base-cased',
-        max_token_len : int = 128,
+        max_token_len: int = 128,
         **kwargs
     ):
         super().__init__()
@@ -57,11 +57,12 @@ class DataModule(pl.LightningDataModule):
         self.tokenizer = transformers.AutoTokenizer.from_pretrained(model_name)
         # Add tokens
         self.emojis2word = {
-            ':)': '<SMILE>', ':-)': '<SMILE>', ';d': '<WINK>', ':-E': '<VAMPIRE>', ':(': '<SAD>',':-(': '<SAD>', ':-<': '<SAD>',
-            ':P': '<RASPBERRY>', ':O': '<SURPRISED>', ':-@': '<SHOCKED>', ':@': '<SHOCKED>',':-$': '<CONFUSED>', ':\\': '<ANNOYED>',
-            ':#': '<MUTE>', ':X': '<MUTE>', ':^)': '<SMILE>', ':-&': '<CONFUSED>', '$_$': '<GREEDY>','@@': '<EYEROLL>',
-            ':-!': '<CONFUSED>', ':-D': '<SMILE>', ':-0': '<YELL>', 'O.o': '<CONFUSED>','<(-_-)>': '<ROBOT>', 'd[-_-]b': '<DJ>',
-            ":'-)": '<SAD>',';)': '<WINK>',';-)': '<WINK>', 'O:-)': '<ANGEL>','O*-)': '<ANGEL>','(:-D': '<GOSSIP>',
+            ':)': '<SMILE>', ':-)': '<SMILE>', ';d': '<WINK>', ':-E': '<VAMPIRE>', ':(': '<SAD>', ':-(': '<SAD>',
+            ':-<': '<SAD>', ':P': '<RASPBERRY>', ':O': '<SURPRISED>', ':-@': '<SHOCKED>', ':@': '<SHOCKED>',
+            ':-$': '<CONFUSED>', ':\\': '<ANNOYED>', ':#': '<MUTE>', ':X': '<MUTE>', ':^)': '<SMILE>',
+            ':-&': '<CONFUSED>', '$_$': '<GREEDY>', '@@': '<EYEROLL>', ':-!': '<CONFUSED>', ':-D': '<SMILE>',
+            ':-0': '<YELL>', 'O.o': '<CONFUSED>', '<(-_-)>': '<ROBOT>', 'd[-_-]b': '<DJ>', ":'-)": '<SAD>',
+            ';)': '<WINK>', ';-)': '<WINK>', 'O:-)': '<ANGEL>', 'O*-)': '<ANGEL>', '(:-D': '<GOSSIP>',
         }
         self.tokenizer.add_tokens(
             ['<URL>', '<USER>'] + [v for v in self.emojis2word.values()]

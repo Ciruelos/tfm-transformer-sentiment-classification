@@ -73,7 +73,6 @@ if __name__ == '__main__':
         **vars(args)
         )
 
-
     callbacks = [
         pl.callbacks.ProgressBar(),
         pl.callbacks.LearningRateMonitor(logging_interval='epoch'),
@@ -87,7 +86,7 @@ if __name__ == '__main__':
         benchmark=True,
         callbacks=callbacks,
         accumulate_grad_batches=args.accumulate_grad_batches,
-        logger=pl.loggers.TensorBoardLogger(save_dir=f'lightning_logs/', name=args.log_name),
+        logger=pl.loggers.TensorBoardLogger(save_dir='lightning_logs/', name=args.log_name),
     )
 
     trainer.fit(model, data_module)

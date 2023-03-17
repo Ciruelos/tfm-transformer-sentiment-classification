@@ -6,7 +6,7 @@ from argparse import ArgumentParser
 
 import pytorch_lightning as pl
 
-from src.model import Model
+from src.transformer.model import Model
 from src.data_loading import DataModule
 
 MODEL_CHOICES = [

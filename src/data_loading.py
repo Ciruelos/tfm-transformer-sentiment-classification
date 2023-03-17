@@ -56,7 +56,7 @@ class DataModule(pl.LightningDataModule):
 
         self.tokenizer = transformers.AutoTokenizer.from_pretrained(model_name)
         # Add tokens
-        self.emojis2word = {
+        self.emojis2token = {
             ':)': '<SMILE>', ':-)': '<SMILE>', ';d': '<WINK>', ':-E': '<VAMPIRE>', ':(': '<SAD>', ':-(': '<SAD>',
             ':-<': '<SAD>', ':P': '<RASPBERRY>', ':O': '<SURPRISED>', ':-@': '<SHOCKED>', ':@': '<SHOCKED>',
             ':-$': '<CONFUSED>', ':\\': '<ANNOYED>', ':#': '<MUTE>', ':X': '<MUTE>', ':^)': '<SMILE>',
@@ -65,7 +65,7 @@ class DataModule(pl.LightningDataModule):
             ';)': '<WINK>', ';-)': '<WINK>', 'O:-)': '<ANGEL>', 'O*-)': '<ANGEL>', '(:-D': '<GOSSIP>',
         }
         self.tokenizer.add_tokens(
-            ['<URL>', '<USER>'] + [v for v in self.emojis2word.values()]
+            ['<URL>', '<USER>'] + [v for v in self.emojis2token.values()]
         )
 
         self.text_preprocess_steps = [
@@ -151,6 +151,6 @@ class DataModule(pl.LightningDataModule):
         return text
 
     def emojis_per_words(self, text):
-        for emoji, word in self.emojis2word.items():
+        for emoji, word in self.emojis2token.items():
             text = text.replace(emoji, word)
         return text

@@ -75,6 +75,7 @@ class Model(pl.LightningModule):
         self.save_hyperparameters()
 
     def forward(self, x: Dict[str, torch.tensor]):
+        print(x['input_ids'], x['input_ids'].shape)
         return self.model(input_ids=x['input_ids'], attention_mask=x['attention_mask'])
 
     def training_step(self, batch: Tuple[Dict[str, torch.tensor], torch.tensor], batch_idx: int):

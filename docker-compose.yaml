@@ -1,0 +1,12 @@
+version: "2.3"
+services:
+  train:
+    build:
+      context: .
+    volumes:
+      - .:/workspace
+    ipc: host
+    runtime: nvidia
+    entrypoint: bash
+    stdin_open: true
+    tty: true

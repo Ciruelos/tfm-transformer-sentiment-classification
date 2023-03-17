@@ -10,17 +10,24 @@
 	"dockerFile": "../Dockerfile",
 
 	// Set *default* container specific settings.json values on container create.
-	"settings": {
-		"editor.rulers": [120],
-		"files.trimFinalNewlines": true,
-		"files.trimTrailingWhitespace": true,
-		"files.insertFinalNewline": true
-	},
-
-	// Add the IDs of extensions you want installed when the container is created.
-	"extensions": [
-		"ms-python.python"
-	],
+	"customizations": {
+        "vscode": {
+            "settings": {
+                "editor.rulers": [
+                    120
+                ],
+                "files.trimFinalNewlines": true,
+                "files.trimTrailingWhitespace": true,
+                "files.insertFinalNewline": true
+            },
+            "extensions": [
+                "ms-python.python",
+                "ms-python.isort",
+                "ms-python.black-formatter",
+				"njpwerner.autodocstring"
+            ]
+        }
+    },
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],

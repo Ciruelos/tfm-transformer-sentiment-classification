@@ -11,15 +11,22 @@ class Model(pl.LightningModule):
         plateau_factor: float,
         plateau_patience: int,
         monitor: str,
+        n_layers: int,
+        embedding_size: int,
+        hidden_size: int,
         learning_rate: float = 2e-5,
         **kwargs
     ):
         super().__init__()
 
+        self.n_layers = n_layers
+        self.embedding_size = embedding_size
+        self.hidden_size = hidden_size
+
         self.dropout = torch.nn.Dropout(0.2)
-        self.embedding = torch.nn.Embedding(29015, 64, padding_idx=0)
-        self.lstm = torch.nn.LSTM(input_size=64, hidden_size=100, num_layers=2, batch_first=True)
-        self.fc1 = torch.nn.Linear(in_features=100, out_features=1)
+        self.embedding = torch.nn.Embedding(29015, self.embedding_size, padding_idx=0)
+        self.lstm = torch.nn.LSTM(input_size=self.embedding_size, hidden_size=self.hidden_size, num_layers=self.n_layers, batch_first=True)
+        self.fc1 = torch.nn.Linear(in_features=self.hidden_size, out_features=1)
 
         self.learning_rate = learning_rate
 

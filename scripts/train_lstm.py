@@ -25,6 +25,10 @@ def get_parser() -> ArgumentParser:
     parser.add_argument('--test-portion', default=1., type=float, help=h)
     parser.add_argument('--max-token-len', default=64, type=int, help=h)
 
+    # Model
+    parser.add_argument('--n-layers', default=2, type=int, help=h)
+    parser.add_argument('--embedding-size', default=64, type=int, help=h)
+    parser.add_argument('--hidden-size', default=100, type=int, help=h)
 
     # Train
     parser.add_argument('--monitor', default='val_accuracy', type=str, help=h)

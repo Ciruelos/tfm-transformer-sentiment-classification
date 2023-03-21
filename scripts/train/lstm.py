@@ -5,7 +5,7 @@ from argparse import ArgumentParser
 
 import pytorch_lightning as pl
 
-from src.lstm.model import Model
+from models.lstm import Model
 from src.data_loading import DataModule
 
 

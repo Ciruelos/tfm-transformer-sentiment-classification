@@ -1,6 +1,5 @@
 data
 **/lightning_logs
-**/models
 **/data
 **/*.pt
 **/*.pth

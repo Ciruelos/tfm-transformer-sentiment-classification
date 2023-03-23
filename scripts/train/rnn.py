@@ -5,7 +5,7 @@ from argparse import ArgumentParser
 
 import pytorch_lightning as pl
 
-from models.lstm import Model
+from src.models.rnn import Model
 from src.data_loading import DataModule
 
 
@@ -29,6 +29,7 @@ def get_parser() -> ArgumentParser:
     parser.add_argument('--n-layers', default=2, type=int, help=h)
     parser.add_argument('--embedding-size', default=64, type=int, help=h)
     parser.add_argument('--hidden-size', default=100, type=int, help=h)
+    parser.add_argument('--rnn-name', default='lstm', type=str, help=h)
 
     # Train
     parser.add_argument('--monitor', default='val_accuracy', type=str, help=h)

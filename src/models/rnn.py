@@ -5,6 +5,9 @@ import torchmetrics
 import pytorch_lightning as pl
 
 
+RNN_REGISTRY = {'lstm': torch.nn.LSTM, 'gru': torch.nn.GRU}
+
+
 class Model(pl.LightningModule):
     def __init__(
         self,
@@ -14,6 +17,7 @@ class Model(pl.LightningModule):
         n_layers: int,
         embedding_size: int,
         hidden_size: int,
+        rnn_name: str = 'lstm',
         learning_rate: float = 2e-5,
         **kwargs
     ):
@@ -22,10 +26,11 @@ class Model(pl.LightningModule):
         self.n_layers = n_layers
         self.embedding_size = embedding_size
         self.hidden_size = hidden_size
+        self.rnn_name = rnn_name
 
         self.dropout = torch.nn.Dropout(0.2)
         self.embedding = torch.nn.Embedding(29015, self.embedding_size, padding_idx=0)
-        self.lstm = torch.nn.LSTM(input_size=self.embedding_size, hidden_size=self.hidden_size, num_layers=self.n_layers, batch_first=True)
+        self.model = RNN_REGISTRY[self.rnn_name](input_size=self.embedding_size, hidden_size=self.hidden_size, num_layers=self.n_layers, batch_first=True)
         self.fc1 = torch.nn.Linear(in_features=self.hidden_size, out_features=1)
 
         self.learning_rate = learning_rate
@@ -40,7 +45,7 @@ class Model(pl.LightningModule):
 
     def forward(self, x: Dict[str, torch.tensor]):
         embed = self.embedding(x['input_ids'])
-        lstm_out, _ = self.lstm(torch.einsum('blf->lbf', embed))
+        lstm_out, _ = self.model(torch.einsum('blf->lbf', embed))
         y = self.fc1(torch.einsum('lbh->bh', lstm_out))
         return y
 

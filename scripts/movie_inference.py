@@ -50,16 +50,23 @@ if __name__ == '__main__':
     model.to(device)
 
     accuracy = torchmetrics.Accuracy(compute_on_step=False)
+    f1 = torchmetrics.F1(num_classes=2, compute_on_step=False)
     for X, labels in tqdm(data_loader, total=len(data_loader)):
         X = {k: v.to(device) for k, v in X.items()}
 
         preds = model(X)
         accuracy(preds.logits.sigmoid().cpu(), labels.int())
+        f1(preds.logits.sigmoid().cpu() >= 0.5, labels.int())
 
-    value = accuracy.compute()
+    value_acc = accuracy.compute()
     accuracy.reset()
 
-    result = {'accuracy': value.numpy().item(), 'model_name': model_config['model_name']}
+    value_f1 = f1.compute()
+    f1.reset()
+
+    result = {
+        'accuracy': value_acc.numpy().item(), 'f1': value_f1.numpy().item(), 'model_name': model_config['model_name']
+    }
     print(result)
 
     json.dump(result, open(args.model_dir / 'movies.json', 'w'), indent=2)
